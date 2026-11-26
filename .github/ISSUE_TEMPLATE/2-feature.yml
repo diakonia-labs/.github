@@ -1,0 +1,33 @@
+name: Solicitud de mejora
+description: Sugiere una idea o funcionalidad para este proyecto
+title: "[FEAT] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Resumen del problema
+      description: ¿Qué necesidad o problema intenta resolver esta propuesta?
+    validations:
+      required: true
+  - type: textarea
+    id: solucion
+    attributes:
+      label: Solución propuesta
+      description: Describe cómo te gustaría que funcionara.
+    validations:
+      required: true
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas
+      description: Otras opciones o enfoques que hayas pensado.
+    validations:
+      required: false
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto adicional
+      description: Ejemplos, mockups o referencias útiles.
+    validations:
+      required: false
