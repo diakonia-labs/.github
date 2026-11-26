@@ -1,0 +1,57 @@
+name: Reporte de error
+description: Crea un informe para ayudarnos a resolver un problema
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: Descripción
+      description: Explica brevemente qué ocurre y cuál es el impacto.
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducirlo
+      placeholder: |
+        1. Ve a '...'
+        2. Haz clic en '...'
+        3. Observa el error
+    validations:
+      required: true
+  - type: textarea
+    id: comportamiento-esperado
+    attributes:
+      label: Comportamiento esperado
+      description: Qué debería pasar en condiciones normales.
+    validations:
+      required: true
+  - type: textarea
+    id: comportamiento-actual
+    attributes:
+      label: Comportamiento actual
+      description: Qué ocurre exactamente ahora (incluye mensajes de error o logs si los hay).
+    validations:
+      required: true
+  - type: input
+    id: so-dispositivo
+    attributes:
+      label: SO / Dispositivo
+      placeholder: "ej. macOS 15, Windows 11, iOS 18"
+    validations:
+      required: true
+  - type: input
+    id: navegador-version
+    attributes:
+      label: Navegador / Versión
+      placeholder: "ej. Chrome 131, versión 1.4.2"
+    validations:
+      required: true
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto adicional
+      description: Capturas de pantalla, enlaces o cualquier detalle extra.
+    validations:
+      required: false
