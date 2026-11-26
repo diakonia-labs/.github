@@ -1,57 +1,57 @@
-name: Reporte de error
-description: Crea un informe para ayudarnos a resolver un problema
+name: Bug report
+description: Create a report to help us fix a problem
 title: "[BUG] "
 labels: ["bug"]
 body:
   - type: textarea
-    id: descripcion
+    id: description
     attributes:
-      label: Descripción
-      description: Explica brevemente qué ocurre y cuál es el impacto.
+      label: Description
+      description: Briefly explain what happens and what the impact is.
     validations:
       required: true
   - type: textarea
-    id: pasos
+    id: steps
     attributes:
-      label: Pasos para reproducirlo
+      label: Steps to reproduce
       placeholder: |
-        1. Ve a '...'
-        2. Haz clic en '...'
-        3. Observa el error
+        1. Go to '...'
+        2. Click on '...'
+        3. See the error
     validations:
       required: true
   - type: textarea
-    id: comportamiento-esperado
+    id: expected-behavior
     attributes:
-      label: Comportamiento esperado
-      description: Qué debería pasar en condiciones normales.
+      label: Expected behavior
+      description: What should happen under normal conditions.
     validations:
       required: true
   - type: textarea
-    id: comportamiento-actual
+    id: actual-behavior
     attributes:
-      label: Comportamiento actual
-      description: Qué ocurre exactamente ahora (incluye mensajes de error o logs si los hay).
+      label: Actual behavior
+      description: What exactly happens now (include error messages or logs, if any).
     validations:
       required: true
   - type: input
-    id: so-dispositivo
+    id: os-device
     attributes:
-      label: SO / Dispositivo
-      placeholder: "ej. macOS 15, Windows 11, iOS 18"
+      label: OS / Device
+      placeholder: "e.g. macOS 15, Windows 11, iOS 18"
     validations:
       required: true
   - type: input
-    id: navegador-version
+    id: browser-version
     attributes:
-      label: Navegador / Versión
-      placeholder: "ej. Chrome 131, versión 1.4.2"
+      label: Browser / Version
+      placeholder: "e.g. Chrome 131, version 1.4.2"
     validations:
       required: true
   - type: textarea
-    id: contexto
+    id: context
     attributes:
-      label: Contexto adicional
-      description: Capturas de pantalla, enlaces o cualquier detalle extra.
+      label: Additional context
+      description: Screenshots, links, or any other details.
     validations:
       required: false
