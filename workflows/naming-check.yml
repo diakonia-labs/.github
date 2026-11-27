@@ -30,8 +30,9 @@ jobs:
             const MARKER = '<!-- naming-check:pr -->';
             const pr = context.payload.pull_request;
             const { owner, repo } = context.repo;
-            const defaultBranch = context.payload.repository.default_branch;
-            const guide = `https://github.com/${owner}/${repo}/blob/${defaultBranch}/CONTRIBUTING.md#branches-commits-and-pull-requests`;
+            // The contribution guide lives in the organization's .github repository.
+            const guide = 'https://github.com/diakonia-labs/.github/blob/main/CONTRIBUTING.md#pull-request-titles';
+            const branchGuide = 'https://github.com/diakonia-labs/.github/blob/main/CONTRIBUTING.md#branch-names';
 
             // Bots (Dependabot, release tools...) use their own naming.
             if (pr.user.type === 'Bot') return;
@@ -78,7 +79,7 @@ jobs:
 
             if (!branchOk) {
               lines.push(
-                `**For next time:** the branch \`${pr.head.ref}\` doesn't follow our naming convention \`type/issue-number-short-description\`, for example \`feat/42-qr-invitations\`. You don't need to change it for this pull request.`,
+                `**For next time:** the branch \`${pr.head.ref}\` doesn't follow our [naming convention](${branchGuide}) \`type/issue-number-short-description\`, for example \`feat/42-qr-invitations\`. You don't need to change it for this pull request.`,
                 ''
               );
             }
@@ -110,8 +111,8 @@ jobs:
             const LABEL = 'needs-title-fix';
             const issue = context.payload.issue;
             const { owner, repo } = context.repo;
-            const defaultBranch = context.payload.repository.default_branch;
-            const guide = `https://github.com/${owner}/${repo}/blob/${defaultBranch}/CONTRIBUTING.md`;
+            // The contribution guide lives in the organization's .github repository.
+            const guide = 'https://github.com/diakonia-labs/.github/blob/main/CONTRIBUTING.md#issue-titles';
 
             if (issue.user.type === 'Bot') return;
 
@@ -147,7 +148,7 @@ jobs:
               '',
               'You can fix it by editing the title of this issue. This comment will disappear once it is fixed.',
               '',
-              `For questions, please use Discussions instead of issues. See the [contribution guide](${guide}).`,
+              `See the [issue title guide](${guide}). For questions, please use Discussions instead of issues.`,
             ].join('\n');
 
             if (existing) {
