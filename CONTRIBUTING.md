@@ -2,6 +2,8 @@
 
 Thanks for taking the time to contribute! Every thoughtful bug report, documentation improvement, and code change makes this project better.
 
+The tech stack is decided by the maintainers and is not open for discussion. Proposals to change it will be closed.
+
 Organization: [Diakonia Labs](https://github.com/diakonia-labs)
 
 ## Table of contents
