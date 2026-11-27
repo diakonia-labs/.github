@@ -1,0 +1,159 @@
+name: Naming checks
+
+# Checks pull request titles, branch names and issue titles.
+# Leaves a comment explaining how to fix them, and removes it once fixed.
+#
+# Security note: pull_request_target runs with write permissions even for
+# pull requests from forks. That is safe here because this workflow never
+# checks out or runs code from the pull request: it only reads its title
+# and branch name.
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+  issues:
+    types: [opened, edited]
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  pr-naming:
+    name: Check PR naming
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const MARKER = '<!-- naming-check:pr -->';
+            const pr = context.payload.pull_request;
+            const { owner, repo } = context.repo;
+            const defaultBranch = context.payload.repository.default_branch;
+            const guide = `https://github.com/${owner}/${repo}/blob/${defaultBranch}/CONTRIBUTING.md#branches-commits-and-pull-requests`;
+
+            // Bots (Dependabot, release tools...) use their own naming.
+            if (pr.user.type === 'Bot') return;
+
+            // Allowed types and scopes. Keep them in sync with CONTRIBUTING.md.
+            const types = 'feat|fix|docs|spec|refactor|test|chore|ci|perf';
+            const scopes = 'app|desktop|core|backend|specs|docs|ci|deps';
+            const branchTypes = 'feat|fix|docs|spec|refactor|test|chore|ci|hotfix';
+
+            const titleRegex = new RegExp(`^(${types})(\\((${scopes})\\))?!?: \\S.*$`);
+            const branchRegex = new RegExp(`^(${branchTypes})\\/\\d+-[a-z0-9]+(-[a-z0-9]+)*$`);
+
+            const titleOk = titleRegex.test(pr.title);
+            const branchOk = branchRegex.test(pr.head.ref);
+
+            // Find our previous comment, if any.
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: pr.number,
+            });
+            const existing = comments.find(
+              (c) => c.user.type === 'Bot' && c.body.includes(MARKER)
+            );
+
+            if (titleOk && branchOk) {
+              if (existing) {
+                await github.rest.issues.deleteComment({ owner, repo, comment_id: existing.id });
+              }
+              return;
+            }
+
+            const lines = [MARKER, 'Thanks for your pull request!', ''];
+
+            if (!titleOk) {
+              lines.push(
+                `**The title doesn't follow our format.** It must be \`type(scope): description\`, for example \`feat(app): add attendance screen\`.`,
+                '',
+                `- Types: ${types.split('|').map((t) => `\`${t}\``).join(', ')}`,
+                `- Scopes (optional): ${scopes.split('|').map((s) => `\`${s}\``).join(', ')}`,
+                '',
+                'You can fix it by editing the title of this pull request. This check will run again automatically.',
+                ''
+              );
+            }
+
+            if (!branchOk) {
+              lines.push(
+                `**For next time:** the branch \`${pr.head.ref}\` doesn't follow our naming convention \`type/issue-number-short-description\`, for example \`feat/42-qr-invitations\`. You don't need to change it for this pull request.`,
+                ''
+              );
+            }
+
+            lines.push(`See the [contribution guide](${guide}) for details. This comment will disappear once everything is fixed.`);
+            const body = lines.join('\n');
+
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body });
+            }
+
+            // Only the title blocks the merge: it is easy to fix.
+            // The branch name is a reminder, because renaming it would mean opening a new pull request.
+            if (!titleOk) {
+              core.setFailed(`Invalid pull request title: "${pr.title}"`);
+            }
+
+  issue-naming:
+    name: Check issue title
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const MARKER = '<!-- naming-check:issue -->';
+            const LABEL = 'needs-title-fix';
+            const issue = context.payload.issue;
+            const { owner, repo } = context.repo;
+            const defaultBranch = context.payload.repository.default_branch;
+            const guide = `https://github.com/${owner}/${repo}/blob/${defaultBranch}/CONTRIBUTING.md`;
+
+            if (issue.user.type === 'Bot') return;
+
+            // Allowed prefixes. Keep them in sync with the "title" field of your issue templates.
+            const prefixes = ['Bug', 'Feature', 'Improvement', 'Docs', 'Spec'];
+            const titleRegex = new RegExp(`^\\[(${prefixes.join('|')})\\] \\S.*$`);
+            const titleOk = titleRegex.test(issue.title);
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: issue.number,
+            });
+            const existing = comments.find(
+              (c) => c.user.type === 'Bot' && c.body.includes(MARKER)
+            );
+
+            if (titleOk) {
+              if (existing) {
+                await github.rest.issues.deleteComment({ owner, repo, comment_id: existing.id });
+              }
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number: issue.number, name: LABEL });
+              } catch (error) {
+                // The label was not on the issue: nothing to do.
+              }
+              return;
+            }
+
+            const body = [
+              MARKER,
+              'Thanks for opening this issue!',
+              '',
+              `**The title doesn't follow our format.** It must start with one of these prefixes: ${prefixes.map((p) => `\`[${p}]\``).join(', ')}. For example: \`[Bug] Members are duplicated after syncing\`.`,
+              '',
+              'You can fix it by editing the title of this issue. This comment will disappear once it is fixed.',
+              '',
+              `For questions, please use Discussions instead of issues. See the [contribution guide](${guide}).`,
+            ].join('\n');
+
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number: issue.number, body });
+            }
+
+            await github.rest.issues.addLabels({ owner, repo, issue_number: issue.number, labels: [LABEL] });
